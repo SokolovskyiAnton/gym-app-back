@@ -27,9 +27,28 @@ module.exports = {
   },
   async login({body: {password, email}}, res) {
       try {
+          const findUser = await User.findOne({email});
 
+          if (!findUser) {
+              return res.status(403).send({
+                  message: "Sorry, but user or email doesn't match"
+              })
+          }
+          const isPasswordCorrect = findUser.password === password;
+
+          if (!isPasswordCorrect) {
+              return res.status(403).send({
+                  message: "Sorry, but user or email doesn't match"
+              })
+          }
+
+          return res.status(200).send({
+              email: findUser.email
+          })
       } catch (e) {
-
+          return res.status(403).send({
+              message: 'User or password does not match'
+          });
       }
   }
 

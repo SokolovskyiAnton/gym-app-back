@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
 const cors = require('cors');
+const {routes} = require('./src/routes')
 
 
 mongoose.connect(`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.urgqr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`, {
@@ -14,6 +15,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
+routes.forEach(item => {
+    app.use(`/api/v1/${item}`, require(`./src/routes/${item}`))
+})
 
 const PORT = process.env.PORT || 5005;
 http.createServer({}, app).listen(PORT);
