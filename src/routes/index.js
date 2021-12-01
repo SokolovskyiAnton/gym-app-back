@@ -1,5 +1,8 @@
+const {exercise} = require("../controllers");
 module.exports = {
     routes: [
-        'auth'
+        'auth',
+        'exercise',
+        'result'
     ]
 }
