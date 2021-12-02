@@ -1,7 +1,7 @@
-const genericCrud = (model) => ({
+const genericCrud = (model, relations = {}) => ({
     async get({params: {id}}, res) {
         try {
-            const item = await model.findById(id);
+            const item = await model.findById(id).populate(relations.get);
             return res.status(200).send(item);
         } catch (error) {
             return res.status(400).send(error)
@@ -9,7 +9,7 @@ const genericCrud = (model) => ({
     },
     async getAll(_, res) {
         try {
-            const items = await model.find();
+            const items = await model.find().populate(relations.getAll);
             return res.status(200).send(items);
         } catch (error) {
             return res.status(400).send(error)

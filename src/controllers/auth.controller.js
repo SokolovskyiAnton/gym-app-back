@@ -22,7 +22,7 @@ module.exports = {
           })
       } catch (e) {
           return res.status(403).send({
-              message: 'User or password does not match'
+              message: "Sorry, but user or email doesn't match"
           });
       }
   },
@@ -45,12 +45,12 @@ module.exports = {
           const accessToken = jwt.sign({
               userId: findUser._id,
               email: findUser.email
-          }, process.env.JWT_SECRET, {expiresIn: '1m'})
+          }, process.env.JWT_SECRET, {expiresIn: '5m'})
 
           const refreshToken = jwt.sign({
               userId: findUser._id,
               email: findUser.email
-          }, process.env.JWT_SECRET_REFRESH, {expiresIn: '30day'})
+          }, process.env.JWT_SECRET, {expiresIn: '30day'})
 
           const foundToken = await Token.findOne({
               user: findUser._id
