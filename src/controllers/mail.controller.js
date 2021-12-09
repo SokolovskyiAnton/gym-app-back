@@ -21,18 +21,6 @@ const createUserConfirmationEmail = async ({email, username, token}) => {
                 
         `,
     });
-
 }
-
-// const createAdmiConfirmationOrderEmail = async () => {
-//     const email = await transporter.sendMail({
-//         from: '"Antonstore" <delivery@incodewetrust.ru>', // sender address
-//         to: "sokolovskii.anton94@gmail.com", // list of receivers
-//         subject: "Hello ✔", // Subject line
-//         text: "Hello world?", // plain text body
-//         html: "<b>Hello world?</b>", // html body
-//     });
-//     return email
-// }
 
 module.exports = {createUserConfirmationEmail}

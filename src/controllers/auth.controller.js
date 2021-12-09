@@ -158,14 +158,19 @@ module.exports = {
       try {
           const token = req.params.token;
           const decodeUser = await jwt.decode(token, process.env.JWT_SECRET);
+          const findUser = await User.findOne({email: decodeUser.email})
+
+          if (findUser.verifyAt) {
+              return res.redirect('https://lichess.org/')
+          }
+
           await User.findOneAndUpdate({email: decodeUser.email}, {verifyAt: new Date()}, {useFindAndModify: false});
           res.redirect('https://lichess.org/');
       } catch (e) {
           res.status(404).send({
-              massage
+              massage: 'Forbidden'
           })
       }
-
   }
 
 
