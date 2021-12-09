@@ -14,6 +14,14 @@ const schema = new Schema({
         type: String,
         default: ''
     },
+    token: {
+        type: String,
+        default: ''
+    },
+    verifyAt: {
+        type: String,
+        default: ''
+    },
     exercises: [
         {
             type: mongoose.Schema.Types.ObjectId,
