@@ -33,7 +33,7 @@ module.exports = {
           });
       }
   },
-  async login({body: {password, email}}, res) {
+  async login({body: {email, password}}, res) {
       try {
           const findUser = await User.findOne({email});
 
@@ -83,8 +83,7 @@ module.exports = {
               refreshToken,
               id: findUser._id,
               username: findUser.username,
-              email: findUser.email,
-              exercises: findUser.exercises
+              email: findUser.email
           })
       } catch (e) {
           return res.status(403).send({

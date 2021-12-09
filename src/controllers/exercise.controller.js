@@ -32,7 +32,6 @@ module.exports = {
             const user = await User.findOne({_id: body.id})
             const item = await new Exercise({...body.data, user: user._id});
             await item.save();
-            await User.findOneAndUpdate({_id: user._id}, {exercises: [...user.exercises, item]})
             return res.status(200).send({
                 message: 'Success'
             });

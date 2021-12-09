@@ -21,13 +21,7 @@ const schema = new Schema({
     verifyAt: {
         type: String,
         default: ''
-    },
-    exercises: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Exercise'
-        }
-    ]
+    }
 })
 
 module.exports = model('User', schema);
