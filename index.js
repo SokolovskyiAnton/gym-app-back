@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
 const cors = require('cors');
+const cookieParser = require('cookie-parser')
 const {routes} = require('./src/routes')
 
 
@@ -12,7 +13,8 @@ mongoose.connect(`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD
 }).then(() => console.log('Mongo is working.')).catch(e => console.log(e));
 
 const app = express();
-app.use(cors());
+app.use(cookieParser())
+app.use(cors({credentials: true, origin: true}));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 

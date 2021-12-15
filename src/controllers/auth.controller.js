@@ -33,7 +33,8 @@ module.exports = {
           });
       }
   },
-  async login({body: {email, password}}, res) {
+  async login(req, res) {
+      const {email, password} = req.body
       try {
           const findUser = await User.findOne({email});
 
@@ -65,25 +66,27 @@ module.exports = {
 
           if (foundToken) {
               await Token.findOneAndUpdate({user: findUser._id}, {token: accessToken}, {useFindAndModify: false})
+              res.cookie('token', refreshToken, {maxAge: 3600 * 24 * 30})
               return res.status(200).send({
                   accessToken,
                   refreshToken,
                   id: findUser._id,
                   username: findUser.username,
                   email: findUser.email,
-                  exercises: findUser.exercises
+                  verifyAt: findUser.verifyAt
               })
           }
 
           const item = await new Token({token: accessToken, user: findUser._id})
           item.save()
-
+          res.cookie('token', refreshToken, {maxAge: 3600 * 24 * 30})
           return res.status(200).send({
               accessToken,
               refreshToken,
               id: findUser._id,
               username: findUser.username,
-              email: findUser.email
+              email: findUser.email,
+              verifyAt: findUser.verifyAt
           })
       } catch (e) {
           return res.status(403).send({
@@ -114,7 +117,8 @@ module.exports = {
       })
 
   },
-  async refreshToken({body: {refreshToken}, res}) {
+  async refreshToken(req, res) {
+      const refreshToken = req.cookies.token
       if (!refreshToken) {
           return res.status(403).send({
               message: 'Forbidden'
