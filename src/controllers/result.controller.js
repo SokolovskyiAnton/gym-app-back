@@ -22,31 +22,29 @@ module.exports = {
             return res.status(400).send(error)
         }
     },
-    async create({body}, res) {
+    async create(req, res) {
         try {
-            const item = await new Result(body.data);
-            const newItem = await item.save();
-            const findModel = await Exercise.findOne({_id: body.id});
+            const item = await new Result(req.body.data);
+            await item.save();
+            const findModel = await Exercise.findOne({_id: req.body.id});
 
-            await Exercise.findOneAndUpdate({_id: body.id}, {results: [...findModel.results, newItem]}, {useFindAndModify: false})
-            return res.status(200).send({
-                message: 'Success'
-            });
+            await Exercise.findOneAndUpdate({_id: req.body.id}, {results: [...findModel.results, item]}, {useFindAndModify: false})
+            return res.status(200).send({message: 'Product is created'});
         } catch (error) {
             return res.status(400).send(error)
         }
     },
-    async update({params: {id}, body}, res) {
+    async update(req, res) {
         try {
-            const item = await Result.findByIdAndUpdate(id, body, {new: true});
-            return res.status(200).send(item);
+            await Result.findByIdAndUpdate(req.body.id, req.body.data, {new: true});
+            return res.status(200).send({message: 'Product is updated'});
         } catch (error) {
             return res.status(400).send(error)
         }
     },
-    async delete({params: {id}}, res) {
+    async delete(req, res) {
         try {
-            await Result.findByIdAndDelete(id);
+            await Result.findByIdAndDelete(req.body.id);
             return res.status(200).send({status: 'Ok', message: 'Product is deleted'});
         } catch (error) {
             return res.status(400).send(error)

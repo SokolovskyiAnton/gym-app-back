@@ -1,4 +1,4 @@
-const {Exercise, User} = require('../models')
+const {Exercise} = require('../models')
 const jwt = require("jsonwebtoken");
 
 const relations = {
@@ -6,10 +6,18 @@ const relations = {
     get: 'results'
 }
 
+const checkUserAccess = async function (req) {
+    const authorization = req.headers.authorization;
+    const token = authorization.split(' ')[1];
+    const decodeUser = await jwt.decode(token, process.env.JWT_SECRET)
+    return decodeUser
+}
+
 module.exports = {
-    async get({params: {id}}, res) {
+    async get(req, res) {
         try {
-            const item = await Exercise.findById(id).populate(relations.get);
+            await checkUserAccess(req)
+            const item = await Exercise.findById(req.query.id).populate(relations.get);
             return res.status(200).send(item);
         } catch (error) {
             return res.status(400).send(error)
@@ -17,9 +25,7 @@ module.exports = {
     },
     async getAll(req, res) {
         try {
-            const { headers: { authorization } } = req;
-            const token = authorization.split(' ')[1];
-            const decodeUser = await jwt.decode(token, process.env.JWT_SECRET)
+            const decodeUser = await checkUserAccess(req)
 
             const items = await Exercise.find({user: decodeUser.userId}).populate(relations.getAll);
             return res.status(200).send(items);
@@ -27,30 +33,33 @@ module.exports = {
             return res.status(400).send(error)
         }
     },
-    async create({body}, res) {
+    async create(req, res) {
         try {
-            const user = await User.findOne({_id: body.id})
-            const item = await new Exercise({...body.data, user: user._id});
+            const user = await checkUserAccess(req)
+
+            const item = await new Exercise({...req.body, user: user.userId});
             await item.save();
-            return res.status(200).send({
-                message: 'Success'
-            });
-        } catch (error) {
-            return res.status(400).send(error)
-        }
-    },
-    async update({params: {id}, body}, res) {
-        try {
-            const item = await Exercise.findByIdAndUpdate(id, body, {new: true});
             return res.status(200).send(item);
         } catch (error) {
             return res.status(400).send(error)
         }
     },
-    async delete({params: {id}}, res) {
+    async update(req, res) {
         try {
-            await Exercise.findByIdAndDelete(id);
-            return res.status(200).send({status: 'Ok', message: 'Product is deleted'});
+            await checkUserAccess(req)
+
+            const item = await Exercise.findByIdAndUpdate(req.body.id, req.body, {new: true});
+            return res.status(200).send(item);
+        } catch (error) {
+            return res.status(400).send(error)
+        }
+    },
+    async delete(req, res) {
+        try {
+            await checkUserAccess(req)
+
+            await Exercise.findByIdAndDelete(req.body.id);
+            return res.status(200).send({message: 'Product is deleted'});
         } catch (error) {
             return res.status(400).send(error)
         }

@@ -69,7 +69,6 @@ module.exports = {
               res.cookie('token', refreshToken, {maxAge: 3600 * 24 * 30})
               return res.status(200).send({
                   accessToken,
-                  refreshToken,
                   id: findUser._id,
                   username: findUser.username,
                   email: findUser.email,
@@ -82,7 +81,6 @@ module.exports = {
           res.cookie('token', refreshToken, {maxAge: 3600 * 24 * 30})
           return res.status(200).send({
               accessToken,
-              refreshToken,
               id: findUser._id,
               username: findUser.username,
               email: findUser.email,
@@ -112,6 +110,7 @@ module.exports = {
       }
 
       await Token.findByIdAndDelete(foundToken._id)
+      res.clearCookie('token')
       return res.status(200).send({
           message: "User is logged out"
       })
