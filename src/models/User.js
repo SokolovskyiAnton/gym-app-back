@@ -14,7 +14,11 @@ const schema = new Schema({
         type: String,
         default: ''
     },
-    token: {
+    confirmEmail: {
+        type: String,
+        default: ''
+    },
+    resetPassword: {
         type: String,
         default: ''
     },

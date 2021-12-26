@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reset password</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+        .main {
+            width: 500px;
+            height: 500px;
+            background: rgba(243, 243, 242, 0.54);
+            padding: 10px;
+            color: #30373d;
+            font-size: 15px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text {
+            font-size: 18px;
+        }
+        .confirm-btn {
+            display: block;
+            height: 60px;
+            width: 100%;
+            border-radius: 10px;
+            background: #9d9b9b;
+            text-align: center;
+            line-height: 60px;
+            font-size: 20px;
+            text-decoration: none;
+            color: #30373d !important;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <h1 class="text-center">Hello {{username}}</h1>
+
+    <p class="text-center text">Do you want to reset your password ?</p>
+    <p class="text-center text">To continue click on the button</p>
+    <a class="confirm-btn" href="http://localhost:8080/auth/forgot-password?resetPassword={{resetPassword}}">Confirm</a>
+</div>
+</body>
+</html>

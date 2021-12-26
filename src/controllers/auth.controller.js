@@ -9,9 +9,8 @@ module.exports = {
       try {
           const isEmailCorrect = /(?:[a-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/.test(email)
           const findUser = await User.findOne({email});
-
           if (findUser || !isEmailCorrect) {
-              return res.status(403).send({
+              return res.status(401).send({
                   message: 'Sorry, this email is not available'
               });
           }
@@ -19,16 +18,25 @@ module.exports = {
               email: email
           }, process.env.JWT_SECRET, {})
 
-          const createUser = await new User({username, email, password, token});
+          const createUser = await new User({username, email, password, confirmEmail: token});
           const saveUser = await createUser.save();
 
-          await createUserConfirmationEmail(saveUser);
+          const data = {
+              email: saveUser.email,
+              title: 'Welcome in GYM',
+              data: {
+                  username: saveUser.username,
+                  confirmEmail: saveUser.confirmEmail
+              }
+          }
+
+          await createUserConfirmationEmail('welcome', data);
 
           return res.status(200).send({
               message: 'User is created'
           })
       } catch (e) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: "Sorry, but user or email doesn't match"
           });
       }
@@ -39,14 +47,14 @@ module.exports = {
           const findUser = await User.findOne({email});
 
           if (!findUser) {
-              return res.status(403).send({
+              return res.status(401).send({
                   message: "Sorry, but user or email doesn't match"
               })
           }
           const isPasswordCorrect = findUser.password === password;
 
           if (!isPasswordCorrect) {
-              return res.status(403).send({
+              return res.status(401).send({
                   message: "Sorry, but user or email doesn't match"
               })
           }
@@ -87,14 +95,14 @@ module.exports = {
               verifyAt: findUser.verifyAt
           })
       } catch (e) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: 'User or password does not match'
           });
       }
   },
   async logout({headers: {authorization}}, res) {
       if (!authorization) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: "User isn't authorized"
           })
       }
@@ -104,13 +112,13 @@ module.exports = {
       const foundToken = await Token.findOne({user: user.userId})
 
       if (!foundToken) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: "User isn't authorized"
           })
       }
-
       await Token.findByIdAndDelete(foundToken._id)
       res.clearCookie('token')
+
       return res.status(200).send({
           message: "User is logged out"
       })
@@ -119,7 +127,7 @@ module.exports = {
   async refreshToken(req, res) {
       const refreshToken = req.cookies.token
       if (!refreshToken) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: 'Forbidden'
           })
       }
@@ -131,7 +139,7 @@ module.exports = {
           }
       })
       if (!isRefreshTokenValid) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: 'Forbidden'
           })
       }
@@ -140,7 +148,7 @@ module.exports = {
       const currentToken = await Token.findOne({user: decodeUser.userId})
 
       if (!currentToken) {
-          return res.status(403).send({
+          return res.status(401).send({
               message: 'Forbidden'
           })
       }
@@ -163,17 +171,68 @@ module.exports = {
           const findUser = await User.findOne({email: decodeUser.email})
 
           if (findUser.verifyAt) {
-              return res.redirect('https://lichess.org/')
+              return res.redirect('http://localhost:8080/auth/login')
           }
 
           await User.findOneAndUpdate({email: decodeUser.email}, {verifyAt: new Date()}, {useFindAndModify: false});
-          res.redirect('https://lichess.org/');
+          res.redirect('http://localhost:8080/auth/login');
       } catch (e) {
-          res.status(404).send({
+          res.status(403).send({
               massage: 'Forbidden'
           })
       }
+  },
+  async forgotPassword(req, res) {
+      try {
+          const userEmail = req.body.email
+
+          const token = jwt.sign({
+              email: userEmail
+          }, process.env.JWT_SECRET, {expiresIn: '30m'})
+
+          await User.findOneAndUpdate({ email: userEmail }, { resetPassword: token }, {useFindAndModify: false})
+          const findUser = await User.findOne({email: userEmail})
+          const data = {
+              email: findUser.email,
+              title: 'Reset password',
+              data: {
+                  username: findUser.username,
+                  resetPassword: findUser.resetPassword
+              }
+          }
+
+          await createUserConfirmationEmail('reset', data);
+
+          return res.status(200).send({
+              message: 'Success'
+          })
+
+      } catch (e) {
+          res.status(400).send({
+              massage: 'Bad request'
+          })
+      }
+  },
+  async resetPassword(req, res) {
+      try {
+          const token = req.body.token;
+          const findUser = await User.findOne({resetPassword: token})
+          if (!findUser) {
+              res.status(400).send({
+                  massage: 'Bad request'
+              })
+          }
+
+          await User.findOneAndUpdate({ _id: findUser._id }, { password: req.body.password }, {useFindAndModify: false})
+
+          return res.status(200).send({
+              message: 'Success'
+          })
+
+      } catch (e) {
+          res.status(400).send({
+              massage: 'Bad request'
+          })
+      }
   }
-
-
 };

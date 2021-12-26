@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const hbs = require('nodemailer-express-handlebars')
+const path = require('path')
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -10,16 +12,28 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const createUserConfirmationEmail = async ({email, username, token}) => {
-    const message = await transporter.sendMail({
+const handlebarOptions = {
+    viewEngine: {
+        extName: ".handlebars",
+        partialsDir: path.resolve('src/email-templates'),
+        defaultLayout: false,
+    },
+    viewPath: path.resolve('src/email-templates'),
+    extName: ".handlebars",
+}
+
+transporter.use('compile', hbs(handlebarOptions));
+
+const createUserConfirmationEmail = async (template, payload) => {
+    await transporter.sendMail({
         from: "'GYM' <anton.sokolovsky2@gmail.com>",
-        to: `${email}`,
-        subject: "Welcome in GYM",
-        html: `
-            <b>Hello ${username}!</b>
-            <a href="http://localhost:5005/api/v1/auth/verify/${token}">Verify your mail</a>
-                
-        `,
+        to: `${payload.email}`,
+        subject: `${payload.title}`,
+        template: template,
+        context: {
+            ...payload.data
+        }
+
     });
 }
 

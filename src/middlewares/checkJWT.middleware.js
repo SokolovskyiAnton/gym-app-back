@@ -8,16 +8,16 @@ const checkJwtToken = async (req, res, next) => {
         const token = authorization.split(' ')[1];
          verify(token, process.env.JWT_SECRET,async (err) => {
             if (err) {
-                return res.status(403).send({
-                    message: 'Forbidden'
+                return res.status(401).send({
+                    message: 'Token is expired'
                 })
             } else {
                 return next()
             }
         })
     } else {
-        return res.status(403).send({
-            message: 'Forbidden'
+        return res.status(401).send({
+            message: 'Token is expired'
         })
     }
 }
