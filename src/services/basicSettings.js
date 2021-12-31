@@ -1,11 +1,11 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const {User, Token, Result, Exercise} = require('../models');
+const {User, Token, Result, Exercise, Category} = require('../models');
 const {verify, decode} = require("jsonwebtoken");
 
 class BasicSettings {
     constructor() {
-        this.models = {User, Token, Result, Exercise}
+        this.models = {User, Token, Result, Exercise, Category}
     }
     createToken(key, expire, options) {
         const keyOfToken = key === 'access' ? process.env.JWT_SECRET : process.env.JWT_SECRET_REFRESH

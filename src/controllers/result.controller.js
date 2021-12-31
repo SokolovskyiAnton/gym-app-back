@@ -1,53 +1,20 @@
-const {Result, Exercise} = require('../models')
-
-const relations = {
-    getAll: 'exercises',
-    get: 'exercises'
-}
+const {ResultsService} = require('../services/resultsService')
+const Result = new ResultsService()
 
 module.exports = {
-    async get({params: {id}}, res) {
-        try {
-            const item = await Result.findById(id).populate(relations.get);
-            return res.status(200).send(item);
-        } catch (error) {
-            return res.status(400).send(error)
-        }
+    async get(req, res) {
+        await Result.get(req, res)
     },
-    async getAll(_, res) {
-        try {
-            const items = await Result.find().populate(relations.getAll);
-            return res.status(200).send(items);
-        } catch (error) {
-            return res.status(400).send(error)
-        }
+    async getAll(req, res) {
+        await Result.getAll(req, res)
     },
     async create(req, res) {
-        try {
-            const item = await new Result(req.body.data);
-            await item.save();
-            const findModel = await Exercise.findOne({_id: req.body.id});
-
-            await Exercise.findOneAndUpdate({_id: req.body.id}, {results: [...findModel.results, item]}, {useFindAndModify: false})
-            return res.status(200).send({message: 'Product is created'});
-        } catch (error) {
-            return res.status(400).send(error)
-        }
+        await Result.create(req, res)
     },
     async update(req, res) {
-        try {
-            await Result.findByIdAndUpdate(req.body.id, req.body.data, {new: true});
-            return res.status(200).send({message: 'Product is updated'});
-        } catch (error) {
-            return res.status(400).send(error)
-        }
+        await Result.update(req, res)
     },
     async delete(req, res) {
-        try {
-            await Result.findByIdAndDelete(req.body.id);
-            return res.status(200).send({status: 'Ok', message: 'Product is deleted'});
-        } catch (error) {
-            return res.status(400).send(error)
-        }
+        await Result.delete(req, res)
     }
 }

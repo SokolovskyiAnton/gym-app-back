@@ -4,7 +4,26 @@ const schema = new Schema({
         type: String,
         default: ''
     },
-    quantity: {}
+    results: [
+        {
+            weight: {
+                type: String,
+                default: ''
+            },
+            repetition: {
+                type: String,
+                default: ''
+            },
+            duration: {
+                type: String,
+                default: ''
+            },
+            distance: {
+                type: String,
+                default: ''
+            }
+        }
+    ]
 })
 
 module.exports = model('Result', schema);
