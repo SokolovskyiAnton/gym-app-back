@@ -6,7 +6,7 @@ class CategoryService extends BasicSettings {
             const decodeUser = await this.checkUserAccess(req, res)
             const items = await this.models.Category.find().populate({
                 path: 'exercises',
-                match: { user: decodeUser._id},
+                match: { user: decodeUser._id },
                 populate: 'results'
             });
             return res.status(200).send(items);

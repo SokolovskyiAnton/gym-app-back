@@ -3,6 +3,8 @@ module.exports = {
         'auth',
         'exercises',
         'results',
-        'categories'
+        'categories',
+        'calendar',
+        'programs'
     ]
 }
